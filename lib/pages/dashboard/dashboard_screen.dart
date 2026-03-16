@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mini_taskhub/main.dart';
 import 'package:mini_taskhub/pages/app_routes.dart';
+import 'package:mini_taskhub/utils/response_handler.dart';
 import 'package:provider/provider.dart';
-
-import '../../utils/core_constants.dart';
 import '../../utils/form_data_notifier.dart';
 import '../../utils/widgets/flexible_sized_button.dart';
 import '../../utils/widgets/widget_factory.dart';
@@ -23,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       navigatorKey.currentContext!.read<TaskService>().fetchTasks();
     });
@@ -61,31 +61,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: size.width * 0.04),
-          child: _buildTaskList(taskService, size, textTheme, colorScheme),
+          child: ResponseHandler.getResponseWidget(
+            context,
+            taskService.tasksStatus,
+            _buildTaskList(taskService),
+            initialWidget: _buildTaskList(taskService),
+            errorWidget: _buildTaskList(taskService),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTaskList(
-    TaskService service,
-    Size size,
-    TextTheme textTheme,
-    ColorScheme colorScheme,
-  ) {
-    if (service.tasksStatus.screenState == ScreenStateEnum.loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (service.tasksStatus.screenState == ScreenStateEnum.error) {
-      return Center(
-        child: Text(
-          service.tasksStatus.errorText ?? "Error",
-          style: textTheme.bodyMedium,
-        ),
-      );
-    }
-
+  Widget _buildTaskList(TaskService service) {
+    final size = MediaQuery.sizeOf(context);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final tasks = service.tasksStatus.successData ?? [];
 
     if (tasks.isEmpty) {
@@ -103,6 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           direction: DismissDirection.endToStart,
 
           onDismissed: (_) {
+            context.read<TaskService>().removeTaskLocally(task["id"]);
             context.read<TaskService>().deleteTask(task["id"]);
           },
 
@@ -121,7 +113,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               horizontal: size.width * 0.04,
               vertical: size.height * 0.015,
             ),
-
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
@@ -139,7 +130,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
-
                 Expanded(
                   child: Text(
                     task["title"],
@@ -150,7 +140,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
-
                 IconButton(
                   icon: Icon(Icons.edit, color: colorScheme.primary),
                   onPressed: () {
@@ -182,7 +171,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             top: 20,
           ),
-
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -196,24 +184,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               SizedBox(height: size.height * 0.02),
 
-              FlexibleSizedButton(
-                borderRadius: 12,
-                buttonName: "Add Task",
-                onPressed: () {
-                  final data = formNotifier.formData;
-
-                  final title = data["taskName"];
-
-                  if (title == null || title.isEmpty) return;
-
-                  context.read<TaskService>().createTask(title);
-
-                  Navigator.pop(context);
-                },
+              ResponseHandler.getResponseWidget(
+                context,
+                context.read<TaskService>().taskMutationStatus,
+                buildCreateButton(formNotifier),
+                initialWidget: buildCreateButton(formNotifier),
+                errorWidget: buildCreateButton(formNotifier),
               ),
             ],
           ),
         );
+      },
+    );
+  }
+
+  Widget buildCreateButton(FormDataNotifier formNotifier) {
+    return FlexibleSizedButton(
+      borderRadius: 12,
+      buttonName: "Add Task",
+      onPressed: () {
+        final title = formNotifier.formData["taskName"];
+
+        if (title == null || title.isEmpty) return;
+
+        context.read<TaskService>().createTask(title);
+
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Widget buildEditButton(FormDataNotifier formNotifier, Map task) {
+    return FlexibleSizedButton(
+      borderRadius: 12,
+      buttonName: "Update Task",
+      onPressed: () {
+        final title = formNotifier.formData["taskName"];
+
+        context.read<TaskService>().updateTask(
+          taskId: task["id"],
+          title: title,
+        );
+
+        Navigator.pop(context);
       },
     );
   }
@@ -229,7 +242,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (_) {
         return Padding(
           padding: const EdgeInsets.all(16),
-
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -239,18 +251,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               const SizedBox(height: 20),
 
-              FlexibleSizedButton(
-                buttonName: "Update Task",
-                onPressed: () {
-                  final title = formNotifier.formData["taskName"];
-
-                  context.read<TaskService>().updateTask(
-                    taskId: task["id"],
-                    title: title,
-                  );
-
-                  Navigator.pop(context);
-                },
+              ResponseHandler.getResponseWidget(
+                context,
+                context.read<TaskService>().taskMutationStatus,
+                buildEditButton(formNotifier, task),
+                initialWidget: buildEditButton(formNotifier, task),
+                errorWidget: buildEditButton(formNotifier, task),
               ),
             ],
           ),

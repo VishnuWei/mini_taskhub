@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/core_constants.dart';
 import '../../utils/widgets/flexible_sized_button.dart';
-import '../../utils/auth_global.dart';
+import '../../utils/response_handler.dart';
 import 'profile_service.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -22,7 +20,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   void initState() {
     super.initState();
 
-    final profile = jsonDecode(AuthGlobal.instance?.getProfileData() ?? {});
+    final profile = context.read<ProfileService>().profile;
 
     nameController.text = profile["name"] ?? "";
   }
@@ -31,44 +29,46 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return ChangeNotifierProvider(
-      create: (_) => ProfileService(context),
+    final service = context.watch<ProfileService>();
 
-      child: Scaffold(
-        appBar: AppBar(title: const Text("Edit Profile")),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Edit Profile")),
+      body: Padding(
+        padding: EdgeInsets.all(size.width * 0.06),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: "Name"),
+            ),
 
-        body: Consumer<ProfileService>(
-          builder: (_, service, __) {
-            return Padding(
-              padding: EdgeInsets.all(size.width * 0.06),
+            SizedBox(height: size.height * 0.03),
 
-              child: Column(
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: "Name"),
-                  ),
-
-                  SizedBox(height: size.height * 0.03),
-
-                  FlexibleSizedButton(
-                    buttonName: "Save",
-                    onPressed: () async {
-                      final navigator = Navigator.of(context);
-                      await service.updateProfile(name: nameController.text);
-
-                      if (service.profileStatus.screenState ==
-                          ScreenStateEnum.success) {
-                        navigator.pop();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
+            ResponseHandler.getResponseWidget(
+              context,
+              service.profileStatus,
+              buildButton(service),
+              initialWidget: buildButton(service),
+              errorWidget: buildButton(service),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget buildButton(ProfileService service) {
+    return FlexibleSizedButton(
+      buttonName: "Save",
+      onPressed: () async {
+        final navigator = Navigator.of(context);
+
+        await service.updateProfile(name: nameController.text);
+
+        if (service.profileStatus.screenState == ScreenStateEnum.success) {
+          navigator.pop();
+        }
+      },
     );
   }
 }

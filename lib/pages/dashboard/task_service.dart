@@ -30,7 +30,6 @@ class TaskService extends ChangeNotifier {
           .order('created_at', ascending: false);
 
       tasksStatus = CommonStatus.success(response);
-
       notifyListeners();
     } catch (e) {
       tasksStatus = CommonStatus.error(e.toString());
@@ -38,27 +37,6 @@ class TaskService extends ChangeNotifier {
     }
   }
 
-  getTask(String taskId) async {
-    taskMutationStatus = CommonStatus.loading();
-    notifyListeners();
-
-    try {
-      final response = await supabaseService.client
-          .from('tasks')
-          .select()
-          .eq('id', taskId)
-          .single();
-
-      taskMutationStatus = CommonStatus.success(response);
-
-      notifyListeners();
-    } catch (e) {
-      taskMutationStatus = CommonStatus.error(e.toString());
-      notifyListeners();
-    }
-  }
-
-  /// CREATE TASK
   createTask(String title) async {
     taskMutationStatus = CommonStatus.loading();
     notifyListeners();
@@ -87,10 +65,7 @@ class TaskService extends ChangeNotifier {
     }
   }
 
-  updateTask({
-    required String taskId,
-    required String title,
-  }) async {
+  updateTask({required String taskId, required String title}) async {
     taskMutationStatus = CommonStatus.loading();
     notifyListeners();
 
@@ -109,26 +84,28 @@ class TaskService extends ChangeNotifier {
     }
   }
 
-  toggleTask({
-    required String taskId,
-    required bool completed,
-  }) async {
-    taskMutationStatus = CommonStatus.loading();
-    notifyListeners();
-
+  toggleTask({required String taskId, required bool completed}) async {
     try {
       await supabaseService.client
           .from('tasks')
           .update({"completed": !completed})
           .eq('id', taskId);
 
-      taskMutationStatus = CommonStatus.success(true);
-
       await fetchTasks();
     } catch (e) {
       taskMutationStatus = CommonStatus.error(e.toString());
       notifyListeners();
     }
+  }
+
+  void removeTaskLocally(String taskId) {
+    final tasks = tasksStatus.successData ?? [];
+
+    tasks.removeWhere((task) => task["id"] == taskId);
+
+    tasksStatus = CommonStatus.success(List.from(tasks));
+
+    notifyListeners();
   }
 
   deleteTask(String taskId) async {
@@ -139,8 +116,6 @@ class TaskService extends ChangeNotifier {
       await supabaseService.client.from('tasks').delete().eq('id', taskId);
 
       taskMutationStatus = CommonStatus.success(true);
-
-      await fetchTasks();
     } catch (e) {
       taskMutationStatus = CommonStatus.error(e.toString());
       notifyListeners();

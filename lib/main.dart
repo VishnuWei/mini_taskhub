@@ -41,7 +41,11 @@ class MyApp extends StatelessWidget {
           update: (context, supabase, previous) => TaskService(supabase),
         ),
         ChangeNotifierProvider(create: (_) => ThemeNotifier()),
-        ChangeNotifierProvider(create: (_) => ProfileService(context)),
+        ChangeNotifierProxyProvider<SupabaseService, ProfileService>(
+          create: (context) => ProfileService(context),
+          update: (context, supabase, previous) =>
+              previous ?? ProfileService(context),
+        ),
       ],
       child: Consumer<ThemeNotifier>(
         builder: (_, theme, __) {

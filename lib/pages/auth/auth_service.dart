@@ -3,10 +3,8 @@ import 'package:mini_taskhub/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../utils/core_constants.dart';
-import '../../utils/auth_global.dart';
 import '../profile/profile_service.dart';
 import '../services/supabase_service.dart';
-import 'auth_handling.dart';
 import 'auth_ui_def.dart';
 
 class AuthService extends ChangeNotifier {
@@ -33,6 +31,7 @@ class AuthService extends ChangeNotifier {
   Future<void> checkSession() async {
     loginStatus = CommonStatus.loading();
     notifyListeners();
+
     final profileService = ProfileService(navigatorKey.currentContext!);
 
     try {
@@ -46,13 +45,11 @@ class AuthService extends ChangeNotifier {
       }
 
       final profile = await supabaseService.fetchProfile(user.id);
+
       profileService.updateProfileData(profile);
 
-      final data = {"session": session.toJson(), "profile": profile};
+      loginStatus = CommonStatus.success(profile);
 
-      await AuthHandling.saveAuthData(data);
-
-      loginStatus = CommonStatus.success(data);
       notifyListeners();
     } catch (e) {
       loginStatus = CommonStatus.error(e.toString());
@@ -60,9 +57,13 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
     loginStatus = CommonStatus.loading();
     notifyListeners();
+
     final profileService = ProfileService(navigatorKey.currentContext!);
 
     try {
@@ -81,54 +82,13 @@ class AuthService extends ChangeNotifier {
 
       final profile = await supabaseService.fetchProfile(user.id);
 
-      final data = {"session": response.session?.toJson(), "profile": profile};
       profileService.updateProfileData(profile);
 
-      await AuthHandling.saveAuthData(data);
+      loginStatus = CommonStatus.success(profile);
 
-      loginStatus = CommonStatus.success(data);
       notifyListeners();
     } catch (e) {
       loginStatus = CommonStatus.error(e.toString());
-      notifyListeners();
-    }
-  }
-
-  signUp({
-    required String email,
-    required String password,
-    required String name,
-  }) async {
-    signupStatus = CommonStatus.loading();
-    notifyListeners();
-    final profileService = ProfileService(navigatorKey.currentContext!);
-
-    try {
-      final response = await supabaseService.signUp(
-        name: name,
-        email: email,
-        password: password,
-      );
-
-      final user = response.user;
-
-      if (user == null) {
-        signupStatus = CommonStatus.error("Signup failed");
-        notifyListeners();
-        return;
-      }
-
-      final profile = await supabaseService.fetchProfile(user.id);
-
-      final data = {"session": response.session?.toJson(), "profile": profile};
-      profileService.updateProfileData(profile);
-
-      await AuthHandling.saveAuthData(data);
-
-      signupStatus = CommonStatus.success(data);
-      notifyListeners();
-    } catch (e) {
-      signupStatus = CommonStatus.error(e.toString());
       notifyListeners();
     }
   }
@@ -156,8 +116,6 @@ class AuthService extends ChangeNotifier {
 
       final data = {"session": session?.toJson(), "profile": profile};
 
-      await AuthHandling.saveAuthData(data);
-
       loginStatus = CommonStatus.success(data);
       notifyListeners();
     } catch (e) {
@@ -166,13 +124,46 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
-    final profileService = ProfileService(navigatorKey.currentContext!);
-    await supabaseService.logout();
+  Future<void> signUp({
+    required String email,
+    required String password,
+    required String name,
+  }) async {
+    signupStatus = CommonStatus.loading();
+    notifyListeners();
 
-    final global = await AuthGlobal.getInstance();
-    global.clearPrefs();
-    profileService.updateProfileData({});
+    final profileService = ProfileService(navigatorKey.currentContext!);
+
+    try {
+      final response = await supabaseService.signUp(
+        email: email,
+        password: password,
+        name: name,
+      );
+
+      final user = response.user;
+
+      if (user == null) {
+        signupStatus = CommonStatus.error("Signup failed");
+        notifyListeners();
+        return;
+      }
+
+      final profile = await supabaseService.fetchProfile(user.id);
+
+      profileService.updateProfileData(profile);
+
+      signupStatus = CommonStatus.success(profile);
+
+      notifyListeners();
+    } catch (e) {
+      signupStatus = CommonStatus.error(e.toString());
+      notifyListeners();
+    }
+  }
+
+  Future<void> logout() async {
+    await supabaseService.logout();
 
     loginStatus = CommonStatus.initial();
     signupStatus = CommonStatus.initial();

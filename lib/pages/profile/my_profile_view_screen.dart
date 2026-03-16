@@ -2,24 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:mini_taskhub/pages/profile/profile_service.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/auth_global.dart';
 import '../../pages/app_routes.dart';
 import '../auth/auth_service.dart';
 import '../../utils/widgets/flexible_sized_button.dart';
 import '../services/theme_notifier.dart';
 
-class MyProfileViewScreen extends StatelessWidget {
+class MyProfileViewScreen extends StatefulWidget {
   const MyProfileViewScreen({super.key});
+
+  @override
+  State<MyProfileViewScreen> createState() => _MyProfileViewScreenState();
+}
+
+class _MyProfileViewScreenState extends State<MyProfileViewScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileService>().loadProfile();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final profileService = context.watch<ProfileService>();
-    
 
+    final profileService = context.watch<ProfileService>();
     final themeNotifier = context.watch<ThemeNotifier>();
+
+    final authService = context.read<AuthService>();
+
+    final email = authService.currentUser?.email ?? "";
 
     return SafeArea(
       child: Scaffold(
@@ -27,18 +43,22 @@ class MyProfileViewScreen extends StatelessWidget {
 
         body: Padding(
           padding: EdgeInsets.all(size.width * 0.06),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Name", style: textTheme.bodySmall),
 
-              Text(profileService.profile["name"] ?? "", style: textTheme.bodyLarge),
+              Text(
+                profileService.profile["name"] ?? "",
+                style: textTheme.bodyLarge,
+              ),
 
               SizedBox(height: size.height * 0.02),
 
               Text("Email", style: textTheme.bodySmall),
 
-              Text(profileService.profile["email"] ?? "", style: textTheme.bodyLarge),
+              Text(email, style: textTheme.bodyLarge),
 
               SizedBox(height: size.height * 0.03),
 
@@ -66,11 +86,8 @@ class MyProfileViewScreen extends StatelessWidget {
                 buttonName: "Logout",
                 onPressed: () async {
                   final navigator = Navigator.of(context);
+
                   await context.read<AuthService>().logout();
-
-                  final global = await AuthGlobal.getInstance();
-
-                  global.clearPrefs();
 
                   navigator.pushNamedAndRemoveUntil(
                     AppRoutes.authScreen,

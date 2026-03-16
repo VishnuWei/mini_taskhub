@@ -3,17 +3,39 @@ import 'package:provider/provider.dart';
 
 import '../../utils/core_constants.dart';
 import '../services/supabase_service.dart';
-import '../../utils/auth_global.dart';
 
 class ProfileService extends ChangeNotifier {
-  final BuildContext profileContext;
+  final BuildContext context;
 
-  ProfileService(this.profileContext);
+  ProfileService(this.context);
 
   CommonStatus profileStatus = CommonStatus.initial();
+
   Map<String, dynamic> profile = {};
 
-  updateProfileData(Map<String, dynamic> newProfile) {
+  Future<void> loadProfile() async {
+    try {
+      final supabase = context.read<SupabaseService>().client;
+
+      final user = supabase.auth.currentUser;
+
+      if (user == null) return;
+
+      final response = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .single();
+
+      profile = Map<String, dynamic>.from(response);
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Profile load error: $e");
+    }
+  }
+
+  void updateProfileData(Map<String, dynamic> newProfile) {
     profile = newProfile;
     notifyListeners();
   }
@@ -23,7 +45,7 @@ class ProfileService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final supabase = profileContext.read<SupabaseService>().client;
+      final supabase = context.read<SupabaseService>().client;
 
       final user = supabase.auth.currentUser;
 
@@ -39,14 +61,10 @@ class ProfileService extends ChangeNotifier {
           .eq('id', user.id)
           .select()
           .single();
-      updateProfileData(response);    
 
-      /// update local cache
-      final global = await AuthGlobal.getInstance();
+      profile = Map<String, dynamic>.from(response);
 
-      global.update(AuthPrefs.profile, response);
-
-      profileStatus = CommonStatus.success(response);
+      profileStatus = CommonStatus.success(profile);
 
       notifyListeners();
     } catch (e) {

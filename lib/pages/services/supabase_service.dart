@@ -26,7 +26,7 @@ class SupabaseService extends ChangeNotifier {
     );
   }
 
-  Future<bool?> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     return await client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: 'io.supabase.flutter://login-callback',
@@ -43,6 +43,7 @@ class SupabaseService extends ChangeNotifier {
         .select()
         .eq('id', userId)
         .maybeSingle();
+
     return response ?? {};
   }
 }
