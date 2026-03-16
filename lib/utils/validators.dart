@@ -128,7 +128,6 @@ class Validator {
 
     if (!nameExp.hasMatch(value)) return 'Please enter a valid Mobile number';
 
-    // To check if the length is exactly 10 characters
     if (value.length != 10) return 'Mobile number must be 10 digits.';
 
     return null;

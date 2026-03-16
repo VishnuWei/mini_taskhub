@@ -19,7 +19,7 @@ class Dialogs {
     return const Center(child: CircularProgressIndicator());
   }
 
-  static Future<void> showCloseableDialog(
+  static showCloseableDialog(
     BuildContext context,
     AlertType alertType,
     String title,
@@ -51,7 +51,7 @@ class Dialogs {
     Navigator.pop(context);
   }
 
-  static Future<void> showAlertDialogBox({
+  static showAlertDialogBox({
     required BuildContext context,
     required String title,
     required String body,

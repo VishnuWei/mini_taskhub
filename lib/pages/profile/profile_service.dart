@@ -13,7 +13,7 @@ class ProfileService extends ChangeNotifier {
 
   Map<String, dynamic> profile = {};
 
-  Future<void> loadProfile() async {
+  loadProfile() async {
     try {
       final supabase = context.read<SupabaseService>().client;
 
@@ -40,7 +40,7 @@ class ProfileService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateProfile({required String name}) async {
+  updateProfile({required String name}) async {
     profileStatus = CommonStatus.loading();
     notifyListeners();
 

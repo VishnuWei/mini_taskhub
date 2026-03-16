@@ -33,7 +33,7 @@ class SupabaseService extends ChangeNotifier {
     );
   }
 
-  Future<void> logout() async {
+  logout() async {
     await client.auth.signOut();
   }
 

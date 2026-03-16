@@ -85,9 +85,5 @@ class CustomPrivacyPolicyNotifier extends ChangeNotifier {
   }
 
   clickingUrl({required String url}) async {
-    // Uri finalUri = Uri.parse(url);
-    // if (!await launchUrl(finalUri)) {
-    // throw Exception('Could not launch $url');
-    // }
   }
 }

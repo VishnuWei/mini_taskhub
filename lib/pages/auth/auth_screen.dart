@@ -77,7 +77,6 @@ class _AuthScreenState extends State<AuthScreen> {
                   SizedBox(height: size.height * 0.05),
                   Expanded(
                     child: ListView(
-                      // crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           currentScreen["title"],

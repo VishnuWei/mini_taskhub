@@ -28,7 +28,7 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkSession() async {
+  checkSession() async {
     loginStatus = CommonStatus.loading();
     notifyListeners();
 
@@ -57,7 +57,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> login({
+  login({
     required String email,
     required String password,
   }) async {
@@ -93,7 +93,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> googleLogin() async {
+  googleLogin() async {
     loginStatus = CommonStatus.loading();
     notifyListeners();
     final profileService = ProfileService(navigatorKey.currentContext!);
@@ -124,7 +124,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> signUp({
+  signUp({
     required String email,
     required String password,
     required String name,
@@ -162,7 +162,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  logout() async {
     await supabaseService.logout();
 
     loginStatus = CommonStatus.initial();

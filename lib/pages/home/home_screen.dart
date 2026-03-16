@@ -66,19 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   .getPageData[homeScreenNotifier.getSelectedIndex];
               homeScreenNotifier.updateContext(context);
               return Scaffold(
-                // appBar: buildAppBar(context, pageData),
-                // endDrawer: const EndDrawerWidget(),
                 body: SafeArea(child: Center(child: pageData['page'])),
                 bottomNavigationBar: CustomBottomNavBar(
                   selectedIndex: homeScreenNotifier.getSelectedIndex,
                   onTabTapped: (index) => homeScreenNotifier.onTabTapped(index),
                   items: homeScreenNotifier.getPageData,
                 ),
-                // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-                // floatingActionButton: pageData['fabExists'] ? FloatingActionButton(
-                //   onPressed: pageData['fabOnPressed'],
-                //   child: pageData['fabChild'] ?? const Icon(Icons.add),
-                // ) : const SizedBox(),
               );
             },
           ),
@@ -88,19 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   AppBar buildAppBar(BuildContext context, Map<String, dynamic> pageData) {
-    // final drawerWidget = Builder(
-    //   builder: (ctx) => CustomIconButton(
-    //     iconData: Icons.person,
-    //     voidCallback: () => Scaffold.of(ctx).openEndDrawer(),
-    //   ),
-    // );
-    //
-    // final List<Widget> actions = List<Widget>.from(pageData['actions'] ?? []);
-    // actions.add(drawerWidget);
-
     return AppBar(
       title: Text(pageData['title'] ?? ''),
-      // actions: actions,
     );
   }
 }

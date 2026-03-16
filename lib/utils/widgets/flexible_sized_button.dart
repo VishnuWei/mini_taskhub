@@ -32,10 +32,8 @@ class FlexibleSizedButton extends StatelessWidget {
   final bool isOutlined;
   final double borderRadius;
 
-  /// optional icon or image
   final Widget? leading;
 
-  /// space between icon and text
   final double spacing;
 
   @override

@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _boot();
   }
 
-  Future<void> _boot() async {
+  _boot() async {
     final authService = context.read<AuthService>();
     final navigator = Navigator.of(context);
 

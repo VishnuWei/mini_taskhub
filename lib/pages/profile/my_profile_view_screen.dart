@@ -65,7 +65,8 @@ class _MyProfileViewScreenState extends State<MyProfileViewScreen> {
               SwitchListTile(
                 value: themeNotifier.isDark,
                 title: Text("Dark Mode", style: textTheme.bodyLarge),
-                activeColor: colorScheme.primary,
+                activeThumbColor: colorScheme.primary,
+                activeTrackColor: colorScheme.primary.withValues(alpha: 0.4),
                 onChanged: themeNotifier.toggleTheme,
               ),
 

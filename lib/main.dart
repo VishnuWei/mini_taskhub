@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mini_taskhub/pages/auth/auth_service.dart';
 import 'package:mini_taskhub/pages/profile/profile_service.dart';
@@ -15,7 +14,7 @@ import 'utils/themes.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-Future<void> main() async {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: Strings.supabaseUrl,

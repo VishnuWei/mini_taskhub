@@ -90,7 +90,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           horizontal: 16,
           vertical: 16,
         ),
-        // Prefix icon
         prefixIcon: prefixIcon != null
             ? Padding(
                 padding: const EdgeInsets.only(left: 14, right: 10),
@@ -125,7 +124,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         focusedBorder: _border(colorScheme.primary, width: 1.5),
         errorBorder: _border(colorScheme.error),
         focusedErrorBorder: _border(colorScheme.error, width: 1.5),
-        // labelText: widget.fieldDef["labelText"],
         labelStyle: textTheme.bodyMedium?.copyWith(
           color: colorScheme.onSecondary,
         ),

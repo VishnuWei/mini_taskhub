@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'core_constants.dart';
 
 class ResponseHandler {
-  /// Handle success data
   CommonStatus handleSuccess(dynamic data, {String? optionalErrorText}) {
     if (data == null) {
       return CommonStatus.error(optionalErrorText ?? "No data found");
@@ -15,7 +14,6 @@ class ResponseHandler {
     return CommonStatus.success(data);
   }
 
-  /// Handle exception
   CommonStatus catchError(dynamic e, StackTrace stackTrace) {
     debugPrint("Error: $e");
     debugPrintStack(stackTrace: stackTrace);
@@ -23,7 +21,6 @@ class ResponseHandler {
     return CommonStatus.error(e.toString());
   }
 
-  /// Full screen response handler
   static Widget getResponseScreen(
     BuildContext context,
     CommonStatus status,
@@ -61,7 +58,6 @@ class ResponseHandler {
     return initialScreen ?? const SizedBox();
   }
 
-  /// Widget-level response handler
   static Widget getResponseWidget(
     BuildContext context,
     CommonStatus status,
@@ -92,7 +88,6 @@ class ResponseHandler {
     return initialWidget ?? const SizedBox();
   }
 
-  /// List widget handler
   static List<Widget> getResponseListWidget(
     BuildContext context,
     CommonStatus status,
